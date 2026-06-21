@@ -101,5 +101,6 @@ https://api-bagy-opcouros.agenciahasse.com.br/v1/bagy/carts
 
 - A API atual da Bagy/Dooca usa `https://api.dooca.store` com `Authorization: Bearer <token>`.
 - A documentacao antiga da Bagy usa `{dominio_da_loja}/web_api` com `access_token` na query. O app ainda suporta esse modo com `BAGY_API_MODE=legacy`.
+- As rotas de `info` e `products` devolvem resposta sanitizada por padrao, adequada para n8n/chatbot. Para uso administrativo interno, use `?raw=1` para receber o JSON completo da Bagy.
 - O endpoint de webhook da Bagy aceita `x-www-form-urlencoded` ou JSON.
 - Checkout/link final ainda precisa ser validado na Bagy, porque a API cria/consulta carrinho, mas a URL final de pagamento pode depender do front da loja.
