@@ -1,4 +1,4 @@
-import { bagyRequest, exchangeBagyCode, refreshBagyToken } from './bagy-client.js';
+import { bagyRequest, exchangeBagyCode, getBagyApiMode, refreshBagyToken } from './bagy-client.js';
 import { getMissingRequiredConfig } from './config.js';
 import { httpError, readJsonBody, sendJson, sendNoContent } from './http-utils.js';
 import { requireInternalApiKey, validateBagyWebhook } from './security.js';
@@ -61,7 +61,8 @@ export async function routeRequest(req, res, url) {
   requireInternalApiKey(req);
 
   if (req.method === 'GET' && url.pathname === '/v1/bagy/info') {
-    return sendJson(res, 200, await bagyRequest('/info'));
+    const infoPath = getBagyApiMode() === 'dooca' ? '/settings' : '/info';
+    return sendJson(res, 200, await bagyRequest(infoPath));
   }
 
   if (req.method === 'GET' && url.pathname === '/v1/bagy/products') {

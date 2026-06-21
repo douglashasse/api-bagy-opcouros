@@ -37,7 +37,8 @@ Preencha no `.env`:
 PORT=3099
 HOST=127.0.0.1
 OPCOUROS_API_KEY=uma-chave-interna-forte
-BAGY_API_BASE=https://www.opcouros.com.br/web_api
+BAGY_API_BASE=https://api.dooca.store
+BAGY_API_MODE=dooca
 BAGY_ACCESS_TOKEN=token-fornecido-pela-bagy
 ```
 
@@ -89,6 +90,7 @@ https://api-bagy-opcouros.agenciahasse.com.br/v1/bagy/carts
    - `NODE_ENV=production`
    - `OPCOUROS_API_KEY`
    - `BAGY_API_BASE`
+   - `BAGY_API_MODE`
    - `BAGY_ACCESS_TOKEN`
    - `BAGY_REFRESH_TOKEN`, se existir
    - `BAGY_WEBHOOK_SECRET`, se usar webhook Bagy
@@ -97,6 +99,7 @@ https://api-bagy-opcouros.agenciahasse.com.br/v1/bagy/carts
 
 ## Observacoes importantes
 
+- A API atual da Bagy/Dooca usa `https://api.dooca.store` com `Authorization: Bearer <token>`.
+- A documentacao antiga da Bagy usa `{dominio_da_loja}/web_api` com `access_token` na query. O app ainda suporta esse modo com `BAGY_API_MODE=legacy`.
 - O endpoint de webhook da Bagy aceita `x-www-form-urlencoded` ou JSON.
-- Se a Bagy tiver assinatura oficial de webhook, devemos adicionar essa validacao quando a documentacao confirmar o formato.
 - Checkout/link final ainda precisa ser validado na Bagy, porque a API cria/consulta carrinho, mas a URL final de pagamento pode depender do front da loja.

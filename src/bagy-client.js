@@ -10,7 +10,10 @@ function buildUrl(path, params = {}) {
   const url = new URL(`${config.bagy.apiBase}${path.startsWith('/') ? path : `/${path}`}`);
   const token = loadTokenState().accessToken;
   if (!token) throw httpError(500, 'BAGY_TOKEN_MISSING', 'BAGY_ACCESS_TOKEN nao configurado.');
-  url.searchParams.set('access_token', token);
+
+  if (getBagyApiMode() === 'legacy') {
+    url.searchParams.set('access_token', token);
+  }
 
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== null && value !== '') {
@@ -18,6 +21,11 @@ function buildUrl(path, params = {}) {
     }
   }
   return url;
+}
+
+export function getBagyApiMode() {
+  if (config.bagy.apiMode !== 'auto') return config.bagy.apiMode;
+  return config.bagy.apiBase.includes('api.dooca.store') ? 'dooca' : 'legacy';
 }
 
 async function parseResponse(response) {
@@ -43,6 +51,10 @@ export async function bagyRequest(path, { method = 'GET', params = {}, body } = 
       'user-agent': 'api-bagy-opcouros/0.1.0'
     }
   };
+
+  if (getBagyApiMode() === 'dooca') {
+    init.headers.authorization = `Bearer ${loadTokenState().accessToken}`;
+  }
 
   if (body !== undefined) {
     init.headers['content-type'] = 'application/json';

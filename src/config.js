@@ -36,6 +36,7 @@ export const config = {
   opcourosApiKey: process.env.OPCOUROS_API_KEY || '',
   bagy: {
     apiBase: cleanBaseUrl(process.env.BAGY_API_BASE || ''),
+    apiMode: process.env.BAGY_API_MODE || 'auto',
     accessToken: process.env.BAGY_ACCESS_TOKEN || '',
     refreshToken: process.env.BAGY_REFRESH_TOKEN || '',
     consumerKey: process.env.BAGY_CONSUMER_KEY || '',
