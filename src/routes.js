@@ -2,6 +2,7 @@ import { bagyRequest, exchangeBagyCode, getBagyApiMode, refreshBagyToken } from 
 import { getMissingRequiredConfig } from './config.js';
 import { httpError, readJsonBody, sendJson, sendNoContent } from './http-utils.js';
 import { requireInternalApiKey, validateBagyWebhook } from './security.js';
+import { sanitizeProductResponse, sanitizeSettings } from './sanitizers.js';
 
 function pickQuery(url, names) {
   const out = {};
@@ -62,18 +63,18 @@ export async function routeRequest(req, res, url) {
 
   if (req.method === 'GET' && url.pathname === '/v1/bagy/info') {
     const infoPath = getBagyApiMode() === 'dooca' ? '/settings' : '/info';
-    return sendJson(res, 200, await bagyRequest(infoPath));
+    return sendJson(res, 200, sanitizeSettings(await bagyRequest(infoPath)));
   }
 
   if (req.method === 'GET' && url.pathname === '/v1/bagy/products') {
     const params = pickQuery(url, ['page', 'limit', 'available', 'category_id', 'reference', 'name', 'sku']);
-    return sendJson(res, 200, await bagyRequest('/products', { params }));
+    return sendJson(res, 200, sanitizeProductResponse(await bagyRequest('/products', { params })));
   }
 
   const productMatch = url.pathname.match(/^\/v1\/bagy\/products\/([^/]+)$/);
   if (req.method === 'GET' && productMatch) {
     const productId = requirePathParam(productMatch[1], 'product_id');
-    return sendJson(res, 200, await bagyRequest(`/products/${productId}`));
+    return sendJson(res, 200, sanitizeProductResponse(await bagyRequest(`/products/${productId}`)));
   }
 
   if (req.method === 'GET' && url.pathname === '/v1/bagy/orders') {
