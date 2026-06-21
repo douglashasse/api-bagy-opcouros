@@ -1,0 +1,16 @@
+{
+  "name": "api-bagy-opcouros",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "API intermediaria segura entre n8n/OPCouros e API Bagy.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "check": "node --check src/server.js && node --check src/config.js && node --check src/bagy-client.js",
+    "test": "node --test"
+  }
+}

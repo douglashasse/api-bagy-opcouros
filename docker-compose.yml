@@ -1,0 +1,12 @@
+services:
+  api-bagy-opcouros:
+    build: .
+    container_name: api-bagy-opcouros
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "3099:3099"
+    volumes:
+      - ./data:/app/data
+
