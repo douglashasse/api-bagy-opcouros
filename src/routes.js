@@ -15,6 +15,10 @@ function requirePathParam(value, name) {
   return decodeURIComponent(value);
 }
 
+function wantsRawResponse(url) {
+  return ['1', 'true', 'yes'].includes(String(url.searchParams.get('raw') || '').toLowerCase());
+}
+
 export async function routeRequest(req, res, url) {
   if (req.method === 'GET' && url.pathname === '/health') {
     const missing = getMissingRequiredConfig();
@@ -63,18 +67,21 @@ export async function routeRequest(req, res, url) {
 
   if (req.method === 'GET' && url.pathname === '/v1/bagy/info') {
     const infoPath = getBagyApiMode() === 'dooca' ? '/settings' : '/info';
-    return sendJson(res, 200, sanitizeSettings(await bagyRequest(infoPath)));
+    const data = await bagyRequest(infoPath);
+    return sendJson(res, 200, wantsRawResponse(url) ? data : sanitizeSettings(data));
   }
 
   if (req.method === 'GET' && url.pathname === '/v1/bagy/products') {
     const params = pickQuery(url, ['page', 'limit', 'available', 'category_id', 'reference', 'name', 'sku']);
-    return sendJson(res, 200, sanitizeProductResponse(await bagyRequest('/products', { params })));
+    const data = await bagyRequest('/products', { params });
+    return sendJson(res, 200, wantsRawResponse(url) ? data : sanitizeProductResponse(data));
   }
 
   const productMatch = url.pathname.match(/^\/v1\/bagy\/products\/([^/]+)$/);
   if (req.method === 'GET' && productMatch) {
     const productId = requirePathParam(productMatch[1], 'product_id');
-    return sendJson(res, 200, sanitizeProductResponse(await bagyRequest(`/products/${productId}`)));
+    const data = await bagyRequest(`/products/${productId}`);
+    return sendJson(res, 200, wantsRawResponse(url) ? data : sanitizeProductResponse(data));
   }
 
   if (req.method === 'GET' && url.pathname === '/v1/bagy/orders') {
