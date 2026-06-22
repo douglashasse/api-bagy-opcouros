@@ -37,6 +37,7 @@ Preencha no `.env`:
 PORT=3099
 HOST=127.0.0.1
 OPCOUROS_API_KEY=uma-chave-interna-forte
+OPCOUROS_READ_API_KEY=outra-chave-somente-leitura
 BAGY_API_BASE=https://api.dooca.store
 BAGY_API_MODE=dooca
 BAGY_ACCESS_TOKEN=token-fornecido-pela-bagy
@@ -88,7 +89,8 @@ https://api-bagy-opcouros.agenciahasse.com.br/v1/bagy/carts
    - `PORT=3099`
    - `HOST=0.0.0.0`
    - `NODE_ENV=production`
-   - `OPCOUROS_API_KEY`
+   - `OPCOUROS_API_KEY` para rotas admin/escrita
+   - `OPCOUROS_READ_API_KEY` para bot, landings e consultas somente leitura
    - `BAGY_API_BASE`
    - `BAGY_API_MODE`
    - `BAGY_ACCESS_TOKEN`
@@ -102,5 +104,6 @@ https://api-bagy-opcouros.agenciahasse.com.br/v1/bagy/carts
 - A API atual da Bagy/Dooca usa `https://api.dooca.store` com `Authorization: Bearer <token>`.
 - A documentacao antiga da Bagy usa `{dominio_da_loja}/web_api` com `access_token` na query. O app ainda suporta esse modo com `BAGY_API_MODE=legacy`.
 - As rotas de `info` e `products` devolvem resposta sanitizada por padrao, adequada para n8n/chatbot. Para uso administrativo interno, use `?raw=1` para receber o JSON completo da Bagy.
+- `OPCOUROS_READ_API_KEY` permite somente `GET`. Use essa chave no chatbot e em landing pages.
 - O endpoint de webhook da Bagy aceita `x-www-form-urlencoded` ou JSON.
 - Checkout/link final ainda precisa ser validado na Bagy, porque a API cria/consulta carrinho, mas a URL final de pagamento pode depender do front da loja.

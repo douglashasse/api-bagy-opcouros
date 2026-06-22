@@ -34,6 +34,7 @@ export const config = {
   host: process.env.HOST || '0.0.0.0',
   nodeEnv: process.env.NODE_ENV || 'development',
   opcourosApiKey: process.env.OPCOUROS_API_KEY || '',
+  opcourosReadApiKey: process.env.OPCOUROS_READ_API_KEY || '',
   bagy: {
     apiBase: cleanBaseUrl(process.env.BAGY_API_BASE || ''),
     apiMode: process.env.BAGY_API_MODE || 'auto',

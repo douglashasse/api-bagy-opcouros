@@ -9,10 +9,29 @@ function safeEqual(a, b) {
   return timingSafeEqual(left, right);
 }
 
+function getProvidedKey(req) {
+  return getHeader(req, 'x-opcouros-api-key') || getHeader(req, 'authorization')?.replace(/^Bearer\s+/i, '');
+}
+
+function isAdminKey(provided) {
+  return Boolean(config.opcourosApiKey && safeEqual(provided, config.opcourosApiKey));
+}
+
+function isReadKey(provided) {
+  return Boolean(config.opcourosReadApiKey && safeEqual(provided, config.opcourosReadApiKey));
+}
+
 export function requireInternalApiKey(req) {
-  const provided = getHeader(req, 'x-opcouros-api-key') || getHeader(req, 'authorization')?.replace(/^Bearer\s+/i, '');
-  if (!config.opcourosApiKey || !safeEqual(provided, config.opcourosApiKey)) {
-    throw httpError(401, 'UNAUTHORIZED', 'Chave interna ausente ou invalida.');
+  const provided = getProvidedKey(req);
+  if (!isAdminKey(provided)) {
+    throw httpError(401, 'UNAUTHORIZED', 'Chave admin ausente ou invalida.');
+  }
+}
+
+export function requireReadApiKey(req) {
+  const provided = getProvidedKey(req);
+  if (!isAdminKey(provided) && !isReadKey(provided)) {
+    throw httpError(401, 'UNAUTHORIZED', 'Chave de leitura ausente ou invalida.');
   }
 }
 

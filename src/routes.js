@@ -1,7 +1,7 @@
 import { bagyRequest, exchangeBagyCode, getBagyApiMode, refreshBagyToken } from './bagy-client.js';
 import { getMissingRequiredConfig } from './config.js';
 import { httpError, readJsonBody, sendJson, sendNoContent } from './http-utils.js';
-import { requireInternalApiKey, validateBagyWebhook } from './security.js';
+import { requireInternalApiKey, requireReadApiKey, validateBagyWebhook } from './security.js';
 import { sanitizeProductResponse, sanitizeSettings } from './sanitizers.js';
 
 function pickQuery(url, names) {
@@ -63,7 +63,11 @@ export async function routeRequest(req, res, url) {
     throw httpError(404, 'NOT_FOUND', 'Rota nao encontrada.');
   }
 
-  requireInternalApiKey(req);
+  if (req.method === 'GET') {
+    requireReadApiKey(req);
+  } else {
+    requireInternalApiKey(req);
+  }
 
   if (req.method === 'GET' && url.pathname === '/v1/bagy/info') {
     const infoPath = getBagyApiMode() === 'dooca' ? '/settings' : '/info';
