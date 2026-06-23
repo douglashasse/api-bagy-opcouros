@@ -36,6 +36,7 @@ Preencha no `.env`:
 ```dotenv
 PORT=3099
 HOST=127.0.0.1
+ALLOWED_ORIGINS=https://www.opcouros.com.br,https://opcouros.com.br,http://localhost:4177
 OPCOUROS_API_KEY=uma-chave-interna-forte
 OPCOUROS_READ_API_KEY=outra-chave-somente-leitura
 BAGY_API_BASE=https://api.dooca.store
@@ -89,6 +90,7 @@ https://api-bagy-opcouros.agenciahasse.com.br/v1/bagy/carts
    - `PORT=3099`
    - `HOST=0.0.0.0`
    - `NODE_ENV=production`
+   - `ALLOWED_ORIGINS`
    - `OPCOUROS_API_KEY` para rotas admin/escrita
    - `OPCOUROS_READ_API_KEY` para bot, landings e consultas somente leitura
    - `BAGY_API_BASE`

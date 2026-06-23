@@ -33,6 +33,10 @@ export const config = {
   port: Number(process.env.PORT || 3099),
   host: process.env.HOST || '0.0.0.0',
   nodeEnv: process.env.NODE_ENV || 'development',
+  allowedOrigins: (process.env.ALLOWED_ORIGINS || 'https://www.opcouros.com.br,https://opcouros.com.br,http://localhost:4177,http://localhost:4178,http://localhost:4179,http://localhost:4180,http://localhost:4181,http://127.0.0.1:4177,http://127.0.0.1:4178,http://127.0.0.1:4179,http://127.0.0.1:4180,http://127.0.0.1:4181')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
   opcourosApiKey: process.env.OPCOUROS_API_KEY || '',
   opcourosReadApiKey: process.env.OPCOUROS_READ_API_KEY || '',
   bagy: {
