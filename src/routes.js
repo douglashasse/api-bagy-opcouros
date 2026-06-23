@@ -4,6 +4,33 @@ import { httpError, readJsonBody, sendJson, sendNoContent } from './http-utils.j
 import { requireInternalApiKey, requireReadApiKey, validateBagyWebhook } from './security.js';
 import { sanitizeProductResponse, sanitizeSettings } from './sanitizers.js';
 
+const PANTUFA_VARIATIONS = {
+  natural: {
+    35: '21882669',
+    36: '21882670',
+    37: '21882671',
+    38: '21882672',
+    39: '21882673',
+    40: '26049932',
+    41: '26049933',
+    42: '26049935',
+    43: '26406080',
+    44: '28885126'
+  },
+  marrom: {
+    35: '21883130',
+    36: '21883131',
+    37: '21883133',
+    38: '21883134',
+    39: '21883135',
+    40: '26049959',
+    41: '26049960',
+    42: '26049961',
+    43: '26406057',
+    44: '28885125'
+  }
+};
+
 function pickQuery(url, names) {
   const out = {};
   for (const name of names) out[name] = url.searchParams.get(name) || undefined;
@@ -57,6 +84,16 @@ export async function routeRequest(req, res, url) {
     requireInternalApiKey(req);
     const data = await refreshBagyToken();
     return sendJson(res, 200, { ok: true, token_saved: true, bagy: sanitizeTokenResponse(data) });
+  }
+
+  if (req.method === 'GET' && url.pathname === '/v1/public/pantufas/estoque') {
+    const data = await bagyRequest('/products', {
+      params: {
+        limit: '100',
+        name: 'pantufa'
+      }
+    });
+    return sendJson(res, 200, buildPantufaStockResponse(data));
   }
 
   if (!url.pathname.startsWith('/v1/bagy/')) {
@@ -133,6 +170,56 @@ export async function routeRequest(req, res, url) {
   }
 
   throw httpError(404, 'NOT_FOUND', 'Rota Bagy nao implementada ainda.');
+}
+
+function buildPantufaStockResponse(payload) {
+  const products = Array.isArray(payload?.data) ? payload.data : [];
+  const byVariationId = new Map();
+
+  for (const product of products) {
+    for (const variation of product.variations || []) {
+      byVariationId.set(String(variation.id), { product, variation });
+    }
+  }
+
+  const colors = Object.fromEntries(
+    Object.entries(PANTUFA_VARIATIONS).map(([color, sizes]) => {
+      const variations = Object.fromEntries(
+        Object.entries(sizes).map(([size, variationId]) => {
+          const found = byVariationId.get(String(variationId));
+          const product = found?.product || {};
+          const variation = found?.variation || {};
+          const balance = Number(variation.balance ?? 0);
+          const active = variation.active !== false && product.active !== false;
+
+          return [size, {
+            id: Number(variationId),
+            size,
+            color,
+            balance: Number.isFinite(balance) ? Math.max(0, balance) : 0,
+            available: Boolean(active && Number.isFinite(balance) && balance > 0),
+            product_id: product.id || null,
+            product_name: product.name || null,
+            product_url: variation.url || product.url || null,
+            cart_url: `/carrinho/mount?c[0][qty]=1&c[0][id]=${encodeURIComponent(variationId)}`
+          }];
+        })
+      );
+
+      return [color, {
+        label: color === 'natural' ? 'Natural' : 'Marrom',
+        variations
+      }];
+    })
+  );
+
+  return {
+    ok: true,
+    product: 'pantufa-legitima',
+    source: 'bagy',
+    updated_at: new Date().toISOString(),
+    colors
+  };
 }
 
 function sanitizeTokenResponse(data) {
