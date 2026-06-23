@@ -87,13 +87,7 @@ export async function routeRequest(req, res, url) {
   }
 
   if (req.method === 'GET' && url.pathname === '/v1/public/pantufas/estoque') {
-    const data = await bagyRequest('/products', {
-      params: {
-        limit: '100',
-        name: 'pantufa'
-      }
-    });
-    return sendJson(res, 200, buildPantufaStockResponse(data));
+    return sendJson(res, 200, buildPantufaStockResponse(await getPantufaProducts()));
   }
 
   if (!url.pathname.startsWith('/v1/bagy/')) {
@@ -170,6 +164,46 @@ export async function routeRequest(req, res, url) {
   }
 
   throw httpError(404, 'NOT_FOUND', 'Rota Bagy nao implementada ainda.');
+}
+
+async function getPantufaProducts() {
+  const targetIds = new Set(
+    Object.values(PANTUFA_VARIATIONS).flatMap((sizes) => Object.values(sizes))
+  );
+  const foundIds = new Set();
+  const products = [];
+  let currentPage = 1;
+  let lastPage = 1;
+
+  do {
+    const payload = await bagyRequest('/products', {
+      params: {
+        limit: '15',
+        page: String(currentPage)
+      }
+    });
+
+    lastPage = Number(payload?.meta?.last_page || lastPage || currentPage);
+
+    for (const product of payload?.data || []) {
+      const matchingVariations = (product.variations || []).filter((variation) => {
+        const matches = targetIds.has(String(variation.id));
+        if (matches) foundIds.add(String(variation.id));
+        return matches;
+      });
+
+      if (matchingVariations.length) {
+        products.push({
+          ...product,
+          variations: matchingVariations
+        });
+      }
+    }
+
+    currentPage += 1;
+  } while (currentPage <= lastPage && foundIds.size < targetIds.size);
+
+  return { data: products };
 }
 
 function buildPantufaStockResponse(payload) {
